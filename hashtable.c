@@ -176,6 +176,10 @@ void * hash_table_lookup(hash_table_t * table, void * key, size_t key_len)
                 LOG("Found Key at hash -> %d", (int)hash);
                 return temp->value;
             }
+            else
+            {
+                temp = temp->next;
+            }
         }
     }
     LOG("Key not found at hash %d", (int)hash);

@@ -24,14 +24,7 @@ debug :
 
 doxy :
 	doxygen Doxyfile
-	sh update_doc.sh	
 
 clean :
 	rm -rf $(OBJS) main
-
-cs :
-	cscope -bRv
-
-cscope :
-	cscope -bRv
 

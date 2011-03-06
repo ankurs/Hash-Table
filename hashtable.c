@@ -11,11 +11,14 @@ hash_table_element_t * hash_table_element_new()
     return calloc(1, hash_table_element_s);
 }
 
-void hash_table_element_delete(hash_table_element_t * element)
+void hash_table_element_delete(hash_table_t * table, hash_table_element_t * element)
 {
     INFO("Deleting an hash table element");
+    if (table->mode = MODE_COPY)
+    {
+        free(element->value);
+    }
     free(element->key);
-    free(element->value);
     free(element);
 }
 
@@ -38,7 +41,7 @@ void hash_table_delete(hash_table_t * table)
         {
             hash_table_element_t * temp = table->store_house[i];
             table->store_house[i] = table->store_house[i]->next;
-            hash_table_element_delete(temp);
+            hash_table_element_delete(table, temp);
         }
     }
     free(table);
@@ -142,11 +145,12 @@ int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
             if (!memcmp(temp->key, key, key_len))
             {
                 prev->next = temp->next;
-                hash_table_element_delete(temp);
+                hash_table_element_delete(table, temp);
                 INFO("Deleted a key-value pair from the hash table");
                 table->key_count--;
                 return 0;
             }
+            temp=temp->next;
         }
     }
     INFO("Key Not Found");
@@ -209,6 +213,7 @@ int hash_table_has_key(hash_table_t * table, void * key, size_t key_len)
                 LOG("Key Found with hash -> %d", (int)hash);
                 return 1; // key found
             }
+            temp=temp->next;
         }
     }
     LOG("Key not found with hash -> %d", (int)hash);
@@ -245,3 +250,16 @@ int hash_table_get_keys(hash_table_t * table, void ** keys)
     return count;
 }
 
+uint16_t hash_table_do_hash(void * key, size_t key_len, uint16_t max_key)
+{
+    uint16_t *ptr = (uint16_t *) key;
+    uint16_t hash = 0xbabe; // WHY NOT
+    unsigned int i=0;
+    for(;i<(key_len/2);i++)
+    {
+        hash+=(i<<4 ^ *ptr<<8 ^ *ptr);
+        ptr++;
+    }
+    hash = hash / max_key;
+    return hash;
+}

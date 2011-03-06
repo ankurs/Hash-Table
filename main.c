@@ -11,7 +11,9 @@ int main()
     int x =0;
     for (x=0;x<300;x++)
     {
+        // use the macro
         HT_ADD(table, &j, &val);
+        // or use the function
         //hash_table_add(table, &j, i, (void *) &val, sizeof(int));
         val++;
         j++;
@@ -19,6 +21,7 @@ int main()
     hash_table_add(table, &j, i, (void *) &val2, 1);
     j--; j--;
     hash_table_remove(table, &j, i);
+    HT_REMOVE(table, &j);
     if (hash_table_has_key(table, &j, i))
     {
         printf("Key found %d\n", j);

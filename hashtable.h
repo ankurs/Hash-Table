@@ -2,9 +2,11 @@
 #define _HASHTABLE_H
 
 #include<sys/types.h>
+#include<stdint.h>
 
 #define HASH_LEN 256
-#define HASH(x,y) (size_t)(((*(int *)x)+(int)y)%HASH_LEN)
+#define HASH1(x,y) (size_t)(((*(int *)x)+(int)y)%HASH_LEN)
+#define HASH(x,y) hash_table_do_hash(x,y,HASH_LEN)
 
 typedef struct hash_table_element hash_table_element_t;
 
@@ -31,10 +33,12 @@ typedef struct hash_table
 } hash_table_t;
 #define hash_table_s sizeof(hash_table_t)
 
+
 // element operations
 hash_table_element_t * hash_table_element_new();
-void hash_table_element_delete(hash_table_element_t *);
+void hash_table_element_delete(hash_table_t *, hash_table_element_t *);
 
+uint16_t hash_table_do_hash(void * key, size_t key_len, uint16_t max_key);
 
 // hash table operations
 hash_table_t * hash_table_new(hash_table_mode_t);

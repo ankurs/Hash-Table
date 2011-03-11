@@ -1,3 +1,9 @@
+/**
+ * License GPLv3+
+ * @file hashtable.c
+ * @brief a simple hash table implementation
+ * @author Ankur Shrivastava
+ */
 #include "hashtable.h"
 #include "debug.h"
 
@@ -5,16 +11,26 @@
 #include <string.h>
 
 // element operations
+/**
+ * Function to create a now hash_table element
+ * @returns hash_table_element_t object when success
+ * @returns NULL when no memory
+ */
 hash_table_element_t * hash_table_element_new()
 {
     INFO("creating a new hash table element");
     return calloc(1, hash_table_element_s);
 }
 
+/**
+ * Function to delete an hash table element
+ * @param table table from which element has to be deleted
+ * @param element hash table element to be deleted
+ */
 void hash_table_element_delete(hash_table_t * table, hash_table_element_t * element)
 {
     INFO("Deleting an hash table element");
-    if (table->mode = MODE_COPY)
+    if (table->mode == MODE_COPY)
     {
         free(element->value);
     }
@@ -23,6 +39,12 @@ void hash_table_element_delete(hash_table_t * table, hash_table_element_t * elem
 }
 
 // hash table operations
+/**
+ * Fuction to create a new hash table
+ * @param mode hash_table_mode which the hash table should follow
+ * @returns hash_table_t object which references the hash table
+ * @returns NULL when no memory
+ */
 hash_table_t * hash_table_new(hash_table_mode_t mode)
 {
     INFO("Creating a new hash table");
@@ -31,6 +53,10 @@ hash_table_t * hash_table_new(hash_table_mode_t mode)
     return table;
 }
 
+/**
+ * Function to delete the hash table
+ * @param table hash table to be deleted
+ */
 void hash_table_delete(hash_table_t * table)
 {
     INFO("Deleating a hash table");
@@ -47,6 +73,16 @@ void hash_table_delete(hash_table_t * table)
     free(table);
 }
 
+/**
+ * Function to add a key - value pair to the hash table, use HT_ADD macro
+ * @param table hash table to add element to
+ * @param key pointer to the key for the hash table
+ * @param key_len length of the key in bytes
+ * @param value pointer to the value to be added against the key
+ * @param value_len length of the value in bytes
+ * @returns 0 on sucess
+ * @returns -1 when no memory
+ */
 int hash_table_add(hash_table_t * table, void * key, size_t key_len, void * value, size_t value_len)
 {
     size_t hash = HASH(key, key_len);
@@ -114,7 +150,27 @@ int hash_table_add(hash_table_t * table, void * key, size_t key_len, void * valu
         hash_table_element_t * temp = table->store_house[hash];
         while(temp->next)
         {
-            temp = temp->next;
+            while(temp->next && temp->next->key_len!=key_len)
+            {
+                temp = temp->next;
+            }
+            if(temp->next)
+            {
+                if (!memcmp(temp->next->key, key, key_len))
+                {
+                    LOG("Found Key at hash -> %d", (int)hash);
+                    hash_table_element_t *to_delete = temp->next;
+                    temp->next = element;
+                    element->next = to_delete->next;
+                    hash_table_element_delete(table, to_delete);
+                    // since we are replacing values no need to change key_count
+                    return 0;
+                }
+                else
+                {
+                    temp = temp->next;
+                }
+            }
         }
         temp->next = element;
         table->key_count++;
@@ -122,6 +178,14 @@ int hash_table_add(hash_table_t * table, void * key, size_t key_len, void * valu
     return 0;
 }
 
+/**
+ * Function to remove an hash table element (for a given key) from a given hash table
+ * @param table hash table from which element has to be removed
+ * @param key pointer to the key which has to be removed
+ * @param key_len size of the key in bytes
+ * @returns 0 on sucess
+ * @returns -1 when key is not found
+ */
 int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
 {
     INFO("Deleting a key-value pair from the hash table");
@@ -157,6 +221,14 @@ int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
     return -1; // key not found
 }
 
+/**
+ * Function to lookup a key in a particular table
+ * @param table table to look key in
+ * @param key pointer to key to be looked for
+ * @param key_len size of the key to be searched
+ * @returns NULL when key is not found in the hash table
+ * @returns void* pointer to the value in the table
+ */
 void * hash_table_lookup(hash_table_t * table, void * key, size_t key_len)
 {
     size_t hash = HASH(key, key_len);
@@ -190,6 +262,13 @@ void * hash_table_lookup(hash_table_t * table, void * key, size_t key_len)
     return NULL; // key not found   
 }
 
+/**
+ * Function to look if the exists in the hash table
+ * @param key pointer to key to be looked for
+ * @param key_len size of the key to be searched
+ * @returns 0 when key is not found
+ * @returns 1 when key is found
+ */
 int hash_table_has_key(hash_table_t * table, void * key, size_t key_len)
 {
     size_t hash = HASH(key, key_len);
@@ -220,6 +299,12 @@ int hash_table_has_key(hash_table_t * table, void * key, size_t key_len)
     return 0; // key not found   
 }
 
+/**
+ * Function to return all the keys in a given hash table
+ * @param table hash table from which key are to be reterived
+ * @param keys a void** pointer where keys are filled in (memory allocated internally and must be freed)
+ * @return total number of keys filled in keys 
+ */
 int hash_table_get_keys(hash_table_t * table, void ** keys)
 {
     size_t i = 0;
@@ -250,6 +335,13 @@ int hash_table_get_keys(hash_table_t * table, void ** keys)
     return count;
 }
 
+/**
+ * Function that returns a hash value for a given key and key_len
+ * @param key pointer to the key
+ * @param key_len length of the key
+ * @param max_key max value of the hash to be returned by the function 
+ * @returns hash value belonging to [0, max_key)
+ */
 uint16_t hash_table_do_hash(void * key, size_t key_len, uint16_t max_key)
 {
     uint16_t *ptr = (uint16_t *) key;

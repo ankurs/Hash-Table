@@ -208,10 +208,17 @@ int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
         {
             if (!memcmp(temp->key, key, key_len))
             {
-                prev->next = temp->next;
+                if (prev == table->store_house[hash])
+                {
+                    table->store_house[hash] = temp->next;
+                }
+                else
+                {
+                    prev->next = temp->next;
+                }
                 hash_table_element_delete(table, temp);
                 INFO("Deleted a key-value pair from the hash table");
-                table->key_count--;
+                table->key_count--;                
                 return 0;
             }
             temp=temp->next;

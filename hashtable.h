@@ -10,8 +10,7 @@
 #include<sys/types.h>
 #include<stdint.h>
 
-#define HASH_LEN 256
-#define HASH1(x,y) (size_t)(((*(int *)x)+(int)y)%HASH_LEN)
+#define HASH_LEN table->key_num
 #define HASH(x,y) hash_table_do_hash(x,y,HASH_LEN)
 
 // forward declaration
@@ -52,8 +51,10 @@ struct hash_table_element
 typedef enum hash_table_mode{
     /** copy mode here values as well as key is copied */
     MODE_COPY,
-    /** value reference mode, here ONLY key is copies and value is always referred*/
-    MODE_VALUEREF
+    /** value reference mode, here ONLY key is copies and value is always referred */
+    MODE_VALUEREF,
+    /** in this mode all keys and values are referred */
+    MODE_ALLREF
 } hash_table_mode_t;
 
 /**
@@ -65,15 +66,28 @@ typedef struct hash_table
     /**
      * the hash table array where all values are stored
      */
-    hash_table_element_t  * store_house[HASH_LEN];
+    hash_table_element_t  ** store_house;
+
     /**
      * mode of the hash table
      */
     hash_table_mode_t mode;
+
     /**
      * number of keys in the hash table
      */
     size_t key_count;
+
+    /**
+     * number of keys allocated in the hash table
+     */
+    uint16_t key_num;
+
+    /**
+     * the ratio of key_count / key_num at which the hash table should be expanded
+     */
+    size_t key_ratio;
+
 } hash_table_t;
 #define hash_table_s sizeof(hash_table_t)
 
@@ -204,6 +218,24 @@ int hash_table_has_key(hash_table_t *, void *, size_t);
  * @param keys a void** pointer where keys are filled in (memory allocated internally and must be freed)
  * @return total number of keys filled in keys 
  */
-int hash_table_get_keys(hash_table_t *, void **);
+size_t hash_table_get_keys(hash_table_t *, void **);
 
+/**
+ * Function to get all elements (key - value pairs) from the given hash table
+ * @param table hash table from which elements have to be retrieved
+ * @param elements a pointer to an array of hash_table_element_t pointer (malloced by function)
+ * @returns 1 when no memory 
+ * @returns count of elements 
+ */
+size_t hash_table_get_elements(hash_table_t *, hash_table_element_t *** );
+
+/**
+ * Function to resize the hash table store house
+ * @param table hash table to be resized
+ * @param len new length of the hash table
+ * @returns -1 when no elements in hash table
+ * @returns -2 when no emmory for new store house
+ * @returns 0 when sucess
+ */
+int hash_table_resize(hash_table_t *, size_t);
 #endif

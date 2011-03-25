@@ -3,13 +3,13 @@
 
 int main()
 {
-    hash_table_t *table = hash_table_new(MODE_VALUEREF);
+    hash_table_t *table = hash_table_new(MODE_COPY);
     int i = 1;
     int val = 100;
     int val2 = 200;
     int j = 2;
     int x =0;
-    for (x=0;x<300;x++)
+    for (x=0;x<3000;x++)
     {
         // use the macro
         HT_ADD(table, &j, &val);
@@ -32,6 +32,7 @@ int main()
     }
     val = -100;
     val2 = -200;
+    j--;
     int *value = NULL;
     value = (int* ) HT_LOOKUP(table, &j);
     void** keys = NULL;

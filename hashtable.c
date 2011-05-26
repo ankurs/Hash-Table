@@ -258,6 +258,7 @@ int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
                 table->key_count--;                
                 return 0;
             }
+            prev=temp;
             temp=temp->next;
         }
     }

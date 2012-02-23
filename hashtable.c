@@ -79,7 +79,8 @@ void hash_table_delete(hash_table_t * table)
 {
     INFO("Deleating a hash table");
     size_t i=0;
-    for (;i<HASH_LEN;i++)
+    size_t len = HASH_LEN;
+    for (;i<len;i++)
     {
         while (table->store_house[i])
         {
@@ -355,7 +356,8 @@ size_t hash_table_get_keys(hash_table_t * table, void ** keys)
     size_t i = 0;
     size_t count = 0;
     keys = calloc(table->key_count, sizeof(void *));
-    for(i=0;i<HASH_LEN;i++)
+    size_t len = HASH_LEN;
+    for(i=0;i<len;i++)
     {
         if (table->store_house[i])
         {
@@ -397,7 +399,8 @@ size_t hash_table_get_elements(hash_table_t * table, hash_table_element_t *** el
         INFO("No Memory to allocate elements array");
         return 1;
     }
-    for(i=0;i<HASH_LEN;i++)
+    size_t len = HASH_LEN
+    for(i=0;i<len;i++)
     {
         if (table->store_house[i])
         {

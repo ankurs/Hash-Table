@@ -79,7 +79,8 @@ void hash_table_delete(hash_table_t * table)
 {
     INFO("Deleating a hash table");
     size_t i=0;
-    for (;i<HASH_LEN;i++)
+    size_t len = HASH_LEN;
+    for (;i<len;i++)
     {
         while (table->store_house[i])
         {
@@ -355,7 +356,8 @@ size_t hash_table_get_keys(hash_table_t * table, void ** keys)
     size_t i = 0;
     size_t count = 0;
     keys = calloc(table->key_count, sizeof(void *));
-    for(i=0;i<HASH_LEN;i++)
+    size_t len = HASH_LEN;
+    for(i=0;i<len;i++)
     {
         if (table->store_house[i])
         {
@@ -397,7 +399,8 @@ size_t hash_table_get_elements(hash_table_t * table, hash_table_element_t *** el
         INFO("No Memory to allocate elements array");
         return 1;
     }
-    for(i=0;i<HASH_LEN;i++)
+    size_t len = HASH_LEN
+    for(i=0;i<len;i++)
     {
         if (table->store_house[i])
         {
@@ -454,15 +457,8 @@ uint16_t hash_table_do_hash(void * key, size_t key_len, uint16_t max_key)
 int hash_table_resize(hash_table_t *table, size_t len)
 {
     LOG("resizing hash table from %d to %d", table->key_num, len);
-    hash_table_element_t ** elements;
-    size_t count;
-    // FIXME traversing the elements twice, change it some time soon
-    count = hash_table_get_elements(table, &elements);
-    if (!count) 
-    {
-        INFO("Got No Elements from the hash table");
-        return -1;
-    }
+
+    size_t initialLen = table->key_num;
     // keep the current store house in case we dont get more memory
     hash_table_element_t ** temp = table->store_house;
     table->store_house = calloc(len, sizeof(hash_table_element_t *));
@@ -473,15 +469,31 @@ int hash_table_resize(hash_table_t *table, size_t len)
         return -2;
     }
     table->key_num = len;
+
     // fool the new hash table so if refers even previously copied values
     int mode = table->mode;
     table->mode = MODE_ALLREF;
-    while(count>0)
+    size_t count = 0;
+    size_t i;
+    hash_table_element_t  ** store;  //decrease the number of pointer dereferences
+    hash_table_element_t * elem;
+    for(i=0;i<initial_Len;i++)
     {
-        hash_table_element_t *elem = elements[--count];
-        hash_table_add(table, elem->key, elem->key_len, elem->value, elem->value_len);
+        if(elem = store[i]) {
+            hash_table_add(table, elem->key, elem->key_len, elem->value, elem->value_len);
+            count++;
+        }
     }
     table->mode = mode;
+
+    if (!count) 
+    {
+        INFO("Got No Elements from the hash table");  //This resizes it anyway, but it's the
+        //only way to do the whole thing in one pass; shouldn't Key_count give you this value 
+        //anyway?
+        return -1;
+    }
+
     // free old store house
     free(temp);
     return 0;

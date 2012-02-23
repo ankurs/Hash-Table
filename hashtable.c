@@ -494,8 +494,6 @@ int hash_table_resize(hash_table_t *table, size_t len)
         return -1;
     }
 
-    table->key_count = count;
-
     // free old store house
     free(temp);
     return 0;

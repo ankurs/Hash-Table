@@ -238,4 +238,14 @@ size_t hash_table_get_elements(hash_table_t *, hash_table_element_t *** );
  * @returns 0 when sucess
  */
 int hash_table_resize(hash_table_t *, size_t);
+
+/**
+ * Function to iterate through all elements of the hashtable
+ * @param table hash table to be iterated
+ * @param fct pointer to a function returning 1 if the element has to be removed
+ * @param user arbitrary user pointer passed to the fct callback
+ * @returns 0 when success
+ */
+int hash_table_iterate(hash_table_t *table, int (*fct)(void *user,
+    void *value, void *key, size_t key_len), void *user);
 #endif

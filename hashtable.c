@@ -476,6 +476,8 @@ int hash_table_resize(hash_table_t *table, size_t len)
     // fool the new hash table so if refers even previously copied values
     int mode = table->mode;
     table->mode = MODE_ALLREF;
+    // the new table starts from scratch
+    table->key_count = 0;
     while(count>0)
     {
         hash_table_element_t *elem = elements[--count];

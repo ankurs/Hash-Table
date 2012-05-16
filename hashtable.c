@@ -476,6 +476,8 @@ int hash_table_resize(hash_table_t *table, size_t len)
     // fool the new hash table so if refers even previously copied values
     int mode = table->mode;
     table->mode = MODE_ALLREF;
+    // the new table starts from scratch
+    table->key_count = 0;
     while(count>0)
     {
         hash_table_element_t *elem = elements[--count];
@@ -487,3 +489,43 @@ int hash_table_resize(hash_table_t *table, size_t len)
     return 0;
 }
 
+/**
+ * Function to iterate through all elements of the hashtable
+ * @param table hash table to be iterated
+ * @param fct pointer to a function returning 1 if the element has to be removed
+ * @param user arbitrary user pointer passed to the fct callback
+ * @returns 0 when success
+ */
+int hash_table_iterate(hash_table_t *table, int (*fct)(void *user,
+    void *value, void *key, size_t key_len), void *user)
+{
+    LOG("iterating hash table");
+    int i;
+
+    for(i=0;i<HASH_LEN;i++)
+    {
+        if (table->store_house[i])
+        {
+            hash_table_element_t *temp = table->store_house[i];
+            hash_table_element_t *prev = NULL;
+            while(temp)
+            {
+              int r = fct(user, temp->value, temp->key, temp->key_len);
+              if (r){
+                hash_table_element_t *next = temp->next;
+                hash_table_element_delete(table,temp);
+                if(prev == NULL)
+                  table->store_house[i] = next;
+                else
+                  prev->next = next;
+                temp = next;
+                table->key_count--;
+              } else {
+                prev = temp;
+                temp = temp->next;
+              }
+            }
+        }
+    }
+    return 0;
+}

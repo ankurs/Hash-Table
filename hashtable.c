@@ -233,7 +233,7 @@ int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
         return -1; // key not found
     }
     hash_table_element_t *temp = table->store_house[hash];
-    hash_table_element_t *prev = temp;
+    hash_table_element_t *prev = NULL;
     while(temp)
     {
         while(temp && temp->key_len!=key_len)
@@ -245,7 +245,7 @@ int hash_table_remove(hash_table_t * table, void * key, size_t key_len)
         {
             if (!memcmp(temp->key, key, key_len))
             {
-                if (prev == table->store_house[hash])
+                if (!prev)
                 {
                     table->store_house[hash] = temp->next;
                 }
